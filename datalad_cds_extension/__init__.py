@@ -3,25 +3,25 @@
 __docformat__ = 'restructuredtext'
 
 import logging
-lgr = logging.getLogger('datalad.helloworld')
+lgr = logging.getLogger('datalad.cds')
 
 # Defines a datalad command suite.
 # This variable must be bound as a setuptools entrypoint
 # to be found by datalad
 command_suite = (
     # description of the command suite, displayed in cmdline help
-    "Demo DataLad command suite",
+    "TestNachricht",
     [
         # specification of a command, any number of commands can be defined
         (
             # importable module that contains the command implementation
-            'datalad_helloworld.hello_cmd',
+            'datalad_cds_extension.cds',
             # name of the command class implementation in above module
-            'HelloWorld',
+            'CDS',
             # optional name of the command in the cmdline API
-            'hello-cmd',
+            'CDS-loader',
             # optional name of the command in the Python API
-            'hello_cmd'
+            'datalad_cds'
         ),
     ]
 )
