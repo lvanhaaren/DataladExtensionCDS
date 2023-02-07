@@ -14,6 +14,8 @@ from datalad.support.constraints import EnsureChoice
 
 from datalad.interface.results import get_status_dict
 
+import cdsapi
+
 import logging
 lgr = logging.getLogger('datalad.cds.datalad_cds')
 
@@ -31,6 +33,15 @@ class CDS(Interface):
 
     # parameters of the command, must be exhaustive
     _params_ = dict(
+
+        json=Parameter(
+            args=("-json"),
+            doc="""json file with cds-api line"""
+        ),
+
+
+
+
         # name of the parameter, must match argument name
         language=Parameter(
             # cmdline argument definitions, incl aliases
@@ -49,6 +60,12 @@ class CDS(Interface):
     @eval_results
     # signature must match parameter list above
     # additional generic arguments are added by decorators
+    def __call__(json):
+        f=open(json)
+        c=cdsapi.Client()
+        c.retrieve(f.read())         
+    
+    
     def __call__(language='en'):
         if language == 'en':
             msg = 'Hello!'
