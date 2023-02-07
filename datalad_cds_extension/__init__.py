@@ -15,13 +15,13 @@ command_suite = (
         # specification of a command, any number of commands can be defined
         (
             # importable module that contains the command implementation
-            'datalad_cds_extension.cds',
+            'datalad_cds_extension.downloadcds',
             # name of the command class implementation in above module
-            'CDS',
+            'DownloadCDS',
             # optional name of the command in the cmdline API
-            'CDS-loader',
+            'download-cds',
             # optional name of the command in the Python API
-            'datalad_cds'
+            'download-cds'
         ),
     ]
 )

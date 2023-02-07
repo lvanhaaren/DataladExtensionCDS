@@ -10,4 +10,4 @@ docs/build
 docs/source/generated
 build/
 dist/
-download.grib"
+*.grib
