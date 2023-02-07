@@ -19,9 +19,9 @@ command_suite = (
             # name of the command class implementation in above module
             'DownloadCDS',
             # optional name of the command in the cmdline API
-            'download_cds',
+            'download-cds',
             # optional name of the command in the Python API
-            'download_cds'
+            'download-cds'
         ),
     ]
 )
