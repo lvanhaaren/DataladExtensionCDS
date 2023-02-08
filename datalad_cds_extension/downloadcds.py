@@ -1,23 +1,30 @@
 """DataLad demo command"""
 
 __docformat__ = 'restructuredtext'
-
-from os.path import curdir
-from os.path import abspath
+import os
+import json
+from typing import Dict, Iterable, List, Literal, Optional
 
 from datalad.interface.base import Interface
 from datalad.interface.base import build_doc
 from datalad.support.param import Parameter
+from datalad.support.annexrepo import AnnexRepo
 from datalad.distribution.dataset import datasetmethod
 from datalad.interface.utils import eval_results
 from datalad.support.constraints import EnsureChoice
+from datalad.distribution.dataset import (
+    Dataset,
+    EnsureDataset,
+    datasetmethod,
+    require_dataset,
+)
 
 from datalad.interface.results import get_status_dict
-
+import datalad_cds_extension.remote
 import cdsapi
-
+from datalad_cds_extension.spec import Spec
 import logging
-lgr = logging.getLogger('datalad.cds.datalad_cds')
+logger = logging.getLogger('datalad.cds.datalad_cds')
 
 
 # decoration auto-generates standard help
@@ -34,7 +41,7 @@ class DownloadCDS(Interface):
     # parameters of the command, must be exhaustive
     _params_ = dict(
 
-        dataset_request=Parameter(
+        user_string_input=Parameter(
             
             doc="""json file with retrieve request"""
 
@@ -58,93 +65,70 @@ class DownloadCDS(Interface):
     @eval_results
     # signature must match parameter list above
     # additional generic arguments are added by decorators
-    def __call__(dataset_request):
-        c=cdsapi.Client()
-        
-        import os.path as osp
-        import ast
+    def __call__(
+        user_string_input : str
+    ) -> Iterable[Dict]:
+        dataset = Dataset()
+        readfile = open(user_string_input)
+        readstr = readfile.read()
+        cmd = [readstr]
+        path = os.getcwd()
+        ds = require_dataset(
+            dataset, check_installed=True, purpose="download from the cds-api"
+        )
+        inputs = []
+        spec = Spec(cmd, inputs)
+        logger.debug("spec is %s", spec)
+        url = spec.to_url()
+        logger.debug("url is %s", url)
 
-        if(not osp.isfile(dataset_request)):
-            raise ValueError
-    
-        f = open(dataset_request,"r")
-        #print(bigstring)
-        bigstring=f.read()
-        bigstring=bigstring.replace(" ","")
+        pathobj = ds.pathobj / path
+        logger.debug("target path is %s", pathobj)
 
-
-        startDict = bigstring.index('{')
-        endDict = bigstring.index('}')
-        string_server = bigstring[0:startDict]
-        dictString = bigstring[startDict:endDict+1]
-        string_to = bigstring[endDict+1:len(bigstring)]
-
-        
-        string_server = string_server[1:len(string_server)-1]
-        string_to = string_to[1:len(string_to)-1]
-
-        string_server=string_server.replace(",","")
-        string_server=string_server.replace("\"","")
-        string_server=string_server.replace("'","")
-        string_to=string_to.replace(",","")
-        string_to=string_to.replace("\"","")
-        string_to=string_to.replace("'","")
-
-        request_dict = ast.literal_eval(dictString)
-        c = cdsapi.Client()
-        c.retrieve(string_server,request_dict, string_to)
-
-        yield get_status_dict(
-            # an action label must be defined, the command name make a good
-            # default
-            action='demo',
-            # most results will be about something associated with a dataset
-            # (component), reported paths MUST be absolute
-            path=abspath(curdir),
-            # status labels are used to identify how a result will be reported
-            # and can be used for filtering
-            status='ok',
-            # arbitrary result message, can be a str or tuple. in the latter
-            # case string expansion with arguments is delayed until the
-            # message actually needs to be rendered (analog to exception
-            # messages)
-            message="alles in Butter")
+        ensure_special_remote_exists_and_is_enabled(ds.repo, "cdsrequest")
+        ds.repo.add_url_to_file(pathobj, url)
+        msg = """\
+[DATALAD cdsrequest] {}
+=== Do not change lines below ===
+{}
+^^^ Do not change lines above ^^^
+        """
+        cmd_message_full = "'" + "' '".join(spec.cmd) + "'"
+        cmd_message = (
+            cmd_message_full
+            if len(cmd_message_full) <= 40
+            else cmd_message_full[:40] + " ..."
+        )
+        record = json.dumps(spec.to_dict(), indent=1, sort_keys=True)
+        msg = msg.format(cmd_message,
+            record,
+        )
+        yield ds.save(pathobj, message=msg)
+        yield get_status_dict(action="cdsrequest", status="ok")
 
 
-
-
-
-
-
-
-
-
-
-
-
-#    def __call__(language='en'):
-#        if language == 'en':
-#            msg = 'Hello!'
-#        elif language == 'de':
-#            msg = 'Tachchen!'
-#        else:
-#            msg = ("unknown language: '%s'", language)
-
-        # commands should be implemented as generators and should
-        # report any results by yielding status dictionaries
-#        yield get_status_dict(
-            # an action label must be defined, the command name make a good
-            # default
-#            action='demo',
-            # most results will be about something associated with a dataset
-            # (component), reported paths MUST be absolute
-#            path=abspath(curdir),
-            # status labels are used to identify how a result will be reported
-            # and can be used for filtering
-#            status='ok' if language in ('en', 'de') else 'error',
-            # arbitrary result message, can be a str or tuple. in the latter
-            # case string expansion with arguments is delayed until the
-            # message actually needs to be rendered (analog to exception
-            # messages)
-#            message=msg)
-
+def ensure_special_remote_exists_and_is_enabled(
+    repo: AnnexRepo, remote: Literal["cdsrequest"]
+) -> None:
+    """Initialize and enable the cdsrequest special remote, if it isn't already.
+    Very similar to datalad.customremotes.base.ensure_datalad_remote.
+    """
+    uuids = {"cdsrequest": datalad_cds_extension.remote.cdsrequest_REMOTE_UUID}
+    uuid = uuids[remote]
+    name = repo.get_special_remotes().get(uuid, {}).get("name")
+    if not name:
+        repo.init_remote(
+            remote,
+            [
+                "encryption=none",
+                "type=external",
+                "autoenable=true",
+                "externaltype={}".format(remote),
+                "uuid={}".format(uuid),
+            ],
+        )
+    elif repo.is_special_annex_remote(name, check_if_known=False):
+        logger.debug("special remote %s is enabled", name)
+    else:
+        logger.debug("special remote %s found, enabling", name)
+        repo.enable_remote(name)
