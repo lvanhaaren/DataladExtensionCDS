@@ -36,9 +36,11 @@ class Spec:
         raise ValueError("unsupported URL value encountered")
 
     def to_dict(self) -> Dict[str, Any]:
+        print("asdict:",asdict(self))
         return asdict(self)
 
     def to_json(self) -> str:
+        print("to_json",json.dumps(self.to_dict(), separators=(",", ":")))
         return json.dumps(self.to_dict(), separators=(",", ":"))
 
     def to_url(self) -> str:
@@ -46,3 +48,4 @@ class Spec:
         url = "cdsrequest:v1-" + urllib.parse.quote(
             base64.urlsafe_b64encode(json_spec.encode("utf-8"))
         )
+        return url

@@ -19,6 +19,11 @@ from datalad.distribution.dataset import (
     require_dataset,
     resolve_path
 )
+from datalad.utils import (
+    Path,
+    PurePosixPath,
+    ensure_list_from_str,
+)
 from datalad.support.constraints import (
     EnsureNone,
     EnsureStr,
@@ -128,16 +133,47 @@ class DownloadCDS(Interface):
             # the download() call.
             path = path + op.sep
 
+        if not dir_is_target:
+            if archive:
+                # make sure the file suffix indicated by a URL is preserved
+                # so that any further archive processing doesn't have to
+                # employ mime type inspection in order to determine the archive
+                # type
+                from datalad.support.network import URL
+                suffixes = PurePosixPath(URL(user_string_input).path).suffixes
+                if not Path(path).suffixes == suffixes:
+                    path += ''.join(suffixes)
+            # we know that we have a single URL
+            # download() would be fine getting an existing directory and
+            # downloading the URL underneath it, but let's enforce a trailing
+            # slash here for consistency.
+            if op.isdir(path):
+                yield get_status_dict(
+                    status="error",
+                    message=(
+                        "Non-directory path given (no trailing separator) "
+                        "but a directory with that name (after adding archive "
+                        "suffix) exists"),
+                    type="file",
+                    path=path,
+                    **common_report)
+                return
+        print("Zeile 161")
         spec = Spec(cmd,[])
         logger.debug("spec is %s", spec)
         url = spec.to_url()
         logger.debug("url is %s", url)
 
         pathobj = ds.pathobj / path
+        print(pathobj)
+        print(url)
         logger.debug("target path is %s", pathobj)
+
+        print("Zeile 170")
 
         ensure_special_remote_exists_and_is_enabled(ds.repo, "cdsrequest")
         ds.repo.add_url_to_file(pathobj, url)
+        print("Zeile 174")
         msg = """\
 [DATALAD cdsrequest] {}
 === Do not change lines below ===
@@ -145,6 +181,8 @@ class DownloadCDS(Interface):
 ^^^ Do not change lines above ^^^
         """
         cmd_message_full = "'" + "' '".join(spec.cmd) + "'"
+        print("Zeile 180")
+
         cmd_message = (
             cmd_message_full
             if len(cmd_message_full) <= 40
@@ -154,6 +192,7 @@ class DownloadCDS(Interface):
         msg = msg.format(cmd_message,
             record,
         )
+        print("Zeile 192")
         yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
 
@@ -164,13 +203,9 @@ def ensure_special_remote_exists_and_is_enabled(
     """Initialize and enable the cdsrequest special remote, if it isn't already.
     Very similar to datalad.customremotes.base.ensure_datalad_remote.
     """
-    print("first statement ensure")
     uuids = {"cdsrequest": datalad_cds_extension.cdsrequest.cdsrequest_REMOTE_UUID}
-    print("nach uuid")
     uuid = uuids[remote]
-    print("print nach uuids[remote]")
     name = repo.get_special_remotes().get(uuid, {}).get("name")
-    print("nach name")
     if not name:
         repo.init_remote(
             remote,
@@ -182,11 +217,9 @@ def ensure_special_remote_exists_and_is_enabled(
                 "uuid={}".format(uuid),
             ],
         )
-        print("not name")
     elif repo.is_special_annex_remote(name, check_if_known=False):
         logger.debug("special remote %s is enabled", name)
-        print("is  special annex remote")
     else:
         logger.debug("special remote %s found, enabling", name)
         repo.enable_remote(name)
-        print("else in annex funktion")
+    print("ensure remote wurde beendet")
