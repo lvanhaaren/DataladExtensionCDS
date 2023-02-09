@@ -29,7 +29,7 @@ class CdsRemote(SpecialRemote):
     def initremote(self) -> None:
         # setting the uuid here unfortunately does not work, initremote is
         # executed to late
-        # self.annex.setconfig("uuid", GETEXEC_REMOTE_UUID)
+        # self.annex.setconfig("uuid", cdsrequest_REMOTE_UUID)
         pass
 
     def prepare(self) -> None:
@@ -84,7 +84,7 @@ class CdsRemote(SpecialRemote):
             inspect.stack()[0][3],
             key,
         )
-        urls = self.annex.geturls(key, "getexec:")
+        urls = self.annex.geturls(key, "cdsrequest:")
         logger.debug("urls for this key: %s", urls)
         for url in urls:
             try:
@@ -100,10 +100,10 @@ class CdsRemote(SpecialRemote):
         return True
 
     def claimurl(self, url: str) -> bool:
-        return url.startswith("getexec:")
+        return url.startswith("cdsrequest:")
 
     def checkurl(self, url: str) -> bool:
-        return url.startswith("getexec:")
+        return url.startswith("cdsrequest:")
         
 
 def main():
