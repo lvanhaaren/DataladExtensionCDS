@@ -79,7 +79,6 @@ class CdsRemote(SpecialRemote):
         self._execute_cds(cmd)
 
     def transfer_retrieve(self, key: str) -> None:
-        print("transfer_retrieve wird aufgerufen")
         logger.debug(
             "%s called with key %s and filename %s",
             inspect.stack()[0][3],
@@ -101,10 +100,12 @@ class CdsRemote(SpecialRemote):
         return True
 
     def claimurl(self, url: str) -> bool:
-        return url.startswith("cdsrequest:")
+        #return url.startswith("cdsrequest:")
+        return True
 
     def checkurl(self, url: str) -> bool:
-        return url.startswith("cdsrequest:")
+        #return url.startswith("cdsrequest:")
+        return True
         
 
 def main():

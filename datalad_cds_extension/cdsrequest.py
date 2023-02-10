@@ -34,7 +34,7 @@ class CdsRemote(SpecialRemote):
     def prepare(self) -> None:
         pass
 
-    def _execute_cds(self, list: List[str]) -> None:
+    def _execute_cds(self, list: List[str],filename) -> None:
         user_input = list[0]
         logger.debug("downloading %s", user_input)
         #self.annex.info("executing {}".format(user_input))
@@ -63,7 +63,7 @@ class CdsRemote(SpecialRemote):
         c = cdsapi.Client()
         c.retrieve(string_server,request_dict, string_to)
 
-    def _handle_url(self, url: str) -> None:
+    def _handle_url(self, url: str,filename) -> None:
         import datalad.api as da
         from datalad.utils import swallow_outputs
 
@@ -75,7 +75,7 @@ class CdsRemote(SpecialRemote):
                 da.get(set(inputs))
                 logger.info("datalad get output: %s", cm.out)
         cmd = spec.cmd
-        self._execute_cds(cmd)
+        self._execute_cds(cmd,filename)
 
     def transfer_retrieve(self, key: str,filename) -> None:
         logger.debug(
@@ -87,7 +87,7 @@ class CdsRemote(SpecialRemote):
         logger.debug("urls for this key: %s", urls)
         for url in urls:
             try:
-                self._handle_url(url)
+                self._handle_url(url,filename)
                 break
             except HandleUrlError:
                 pass
@@ -99,10 +99,12 @@ class CdsRemote(SpecialRemote):
         return True
 
     def claimurl(self, url: str) -> bool:
-        return url.startswith("cdsrequest:")
+        #return url.startswith("cdsrequest:")
+        return True
 
     def checkurl(self, url: str) -> bool:
-        return url.startswith("cdsrequest:")
+        #return url.startswith("cdsrequest:")
+        return True
         
 
 def main():
