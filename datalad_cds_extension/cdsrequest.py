@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import cdsapi
 import ast
 import inspect
@@ -38,7 +37,7 @@ class CdsRemote(SpecialRemote):
     def _execute_cds(self, list: List[str]) -> None:
         user_input = list[0]
         logger.debug("downloading %s", user_input)
-        self.annex.info("downloading {}".format(user_input))
+        self.annex.info("executing {}".format(user_input))
 
         user_input=user_input.replace(" ","")
 
@@ -78,8 +77,7 @@ class CdsRemote(SpecialRemote):
         cmd = spec.cmd
         self._execute_cds(cmd)
 
-    def transfer_retrieve(self, key: str) -> None:
-        print("transfer_retrieve wird aufgerufen")
+    def transfer_retrieve(self, key: str,filename) -> None:
         logger.debug(
             "%s called with key %s and filename %s",
             inspect.stack()[0][3],

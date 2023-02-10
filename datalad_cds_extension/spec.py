@@ -36,11 +36,9 @@ class Spec:
         raise ValueError("unsupported URL value encountered")
 
     def to_dict(self) -> Dict[str, Any]:
-        print("asdict:",asdict(self))
         return asdict(self)
 
     def to_json(self) -> str:
-        print("to_json",json.dumps(self.to_dict(), separators=(",", ":")))
         return json.dumps(self.to_dict(), separators=(",", ":"))
 
     def to_url(self) -> str:

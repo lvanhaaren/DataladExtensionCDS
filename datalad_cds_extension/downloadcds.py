@@ -109,25 +109,22 @@ class DownloadCDS(Interface):
         dataset=None, path=None, overwrite=False,
         archive=False, save=True, message=None
     ) -> Iterable[Dict]:
-        print("Test")
         readfile = open(user_string_input)
         readstr = readfile.read()
         cmd = [readstr]
         ds = None
-        if save or dataset:
-            try:
-                ds = require_dataset(
-                    dataset, check_installed=True,
-                    purpose='download cds')
-            except NoDatasetFound:
-                pass
-
+        try:
+            ds = require_dataset(
+                dataset, check_installed=True,
+                purpose='download cds')
+        except NoDatasetFound:
+            pass
         common_report = {"action": "download_cds", 
                          "ds": ds}
-
         got_ds_instance = isinstance(dataset, Dataset)
         dir_is_target = not path or str(path).endswith(op.sep)
         path = str(resolve_path(path or op.curdir, ds=dataset))
+        """
         if dir_is_target:
             # resolve_path() doesn't preserve trailing separators. Add one for
             # the download() call.
@@ -158,19 +155,13 @@ class DownloadCDS(Interface):
                     path=path,
                     **common_report)
                 return
-        print("Zeile 161")
-        spec = Spec(cmd,[])
+        """
+        spec = Spec(cmd,None)
         logger.debug("spec is %s", spec)
         url = spec.to_url()
         logger.debug("url is %s", url)
-
         pathobj = ds.pathobj / path
-        print(pathobj)
-        print(url)
         logger.debug("target path is %s", pathobj)
-
-        print("Zeile 170")
-
         ensure_special_remote_exists_and_is_enabled(ds.repo, "cdsrequest")
         ds.repo.add_url_to_file(pathobj, url)
         print("Zeile 174")
@@ -196,7 +187,7 @@ class DownloadCDS(Interface):
         yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
 
-
+import datalad.local.download_url
 def ensure_special_remote_exists_and_is_enabled(
     repo: AnnexRepo, remote: Literal["cdsrequest"]
 ) -> None:
