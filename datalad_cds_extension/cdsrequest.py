@@ -37,7 +37,7 @@ class CdsRemote(SpecialRemote):
     def _execute_cds(self, list: List[str]) -> None:
         user_input = list[0]
         logger.debug("downloading %s", user_input)
-        self.annex.info("executing {}".format(user_input))
+        #self.annex.info("executing {}".format(user_input))
 
         user_input=user_input.replace(" ","")
 
