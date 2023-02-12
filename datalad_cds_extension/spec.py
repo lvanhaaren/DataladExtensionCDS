@@ -46,3 +46,4 @@ class Spec:
         url = "cdsrequest:v1-" + urllib.parse.quote(
             base64.urlsafe_b64encode(json_spec.encode("utf-8"))
         )
+        return url

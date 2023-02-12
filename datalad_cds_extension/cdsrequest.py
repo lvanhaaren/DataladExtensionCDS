@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import cdsapi
 import ast
 import inspect
@@ -12,7 +11,7 @@ from annexremote import Master, RemoteError, SpecialRemote
 from datalad_cds_extension.spec import Spec
 
 
-logger = logging.getLogger("datalad.download-cds.git-annex-remote-cds")
+logger = logging.getLogger("datalad.download-cds.cdsrequest")
 
 cdsrequest_REMOTE_UUID = "1da43985-0b6e-4123-89f0-90b88021ed34"
 
@@ -29,16 +28,16 @@ class CdsRemote(SpecialRemote):
     def initremote(self) -> None:
         # setting the uuid here unfortunately does not work, initremote is
         # executed to late
-        # self.annex.setconfig("uuid", GETEXEC_REMOTE_UUID)
+        # self.annex.setconfig("uuid", cdsrequest_REMOTE_UUID)
         pass
 
     def prepare(self) -> None:
         pass
 
-    def _execute_cds(self, list: List[str]) -> None:
+    def _execute_cds(self, list: List[str],filename) -> None:
         user_input = list[0]
         logger.debug("downloading %s", user_input)
-        self.annex.info("downloading {}".format(user_input))
+        #self.annex.info("executing {}".format(user_input))
 
         user_input=user_input.replace(" ","")
 
@@ -62,9 +61,9 @@ class CdsRemote(SpecialRemote):
 
         request_dict = ast.literal_eval(dictString)
         c = cdsapi.Client()
-        c.retrieve(string_server,request_dict, string_to)
+        c.retrieve(string_server,request_dict, filename)
 
-    def _handle_url(self, url: str) -> None:
+    def _handle_url(self, url: str,filename) -> None:
         import datalad.api as da
         from datalad.utils import swallow_outputs
 
@@ -76,19 +75,19 @@ class CdsRemote(SpecialRemote):
                 da.get(set(inputs))
                 logger.info("datalad get output: %s", cm.out)
         cmd = spec.cmd
-        self._execute_cds(cmd)
+        self._execute_cds(cmd,filename)
 
-    def transfer_retrieve(self, key: str) -> None:
+    def transfer_retrieve(self, key: str,filename) -> None:
         logger.debug(
             "%s called with key %s and filename %s",
             inspect.stack()[0][3],
             key,
         )
-        urls = self.annex.geturls(key, "getexec:")
+        urls = self.annex.geturls(key, "cdsrequest:")
         logger.debug("urls for this key: %s", urls)
         for url in urls:
             try:
-                self._handle_url(url)
+                self._handle_url(url,filename)
                 break
             except HandleUrlError:
                 pass
@@ -100,10 +99,10 @@ class CdsRemote(SpecialRemote):
         return True
 
     def claimurl(self, url: str) -> bool:
-        return url.startswith("getexec:")
+        return url.startswith("cdsrequest:")
 
     def checkurl(self, url: str) -> bool:
-        return url.startswith("getexec:")
+        return url.startswith("cdsrequest:")
         
 
 def main():
