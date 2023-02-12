@@ -119,43 +119,7 @@ class DownloadCDS(Interface):
                 purpose='download cds')
         except NoDatasetFound:
             pass
-        common_report = {"action": "download_cds", 
-                         "ds": ds}
-        got_ds_instance = isinstance(dataset, Dataset)
-        dir_is_target = not path or str(path).endswith(op.sep)
         path = str(resolve_path(path or op.curdir, ds=dataset))
-        """
-        if dir_is_target:
-            # resolve_path() doesn't preserve trailing separators. Add one for
-            # the download() call.
-            path = path + op.sep
-
-        if not dir_is_target:
-            if archive:
-                # make sure the file suffix indicated by a URL is preserved
-                # so that any further archive processing doesn't have to
-                # employ mime type inspection in order to determine the archive
-                # type
-                from datalad.support.network import URL
-                suffixes = PurePosixPath(URL(user_string_input).path).suffixes
-                if not Path(path).suffixes == suffixes:
-                    path += ''.join(suffixes)
-            # we know that we have a single URL
-            # download() would be fine getting an existing directory and
-            # downloading the URL underneath it, but let's enforce a trailing
-            # slash here for consistency.
-            if op.isdir(path):
-                yield get_status_dict(
-                    status="error",
-                    message=(
-                        "Non-directory path given (no trailing separator) "
-                        "but a directory with that name (after adding archive "
-                        "suffix) exists"),
-                    type="file",
-                    path=path,
-                    **common_report)
-                return
-        """
         spec = Spec(cmd,None)
         logger.debug("spec is %s", spec)
         url = spec.to_url()
@@ -164,7 +128,6 @@ class DownloadCDS(Interface):
         logger.debug("target path is %s", pathobj)
         ensure_special_remote_exists_and_is_enabled(ds.repo, "cdsrequest")
         ds.repo.add_url_to_file(pathobj, url)
-        print("Zeile 174")
         msg = """\
 [DATALAD cdsrequest] {}
 === Do not change lines below ===
@@ -172,8 +135,6 @@ class DownloadCDS(Interface):
 ^^^ Do not change lines above ^^^
         """
         cmd_message_full = "'" + "' '".join(spec.cmd) + "'"
-        print("Zeile 180")
-
         cmd_message = (
             cmd_message_full
             if len(cmd_message_full) <= 40
@@ -183,7 +144,6 @@ class DownloadCDS(Interface):
         msg = msg.format(cmd_message,
             record,
         )
-        print("Zeile 192")
         yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
 
@@ -213,4 +173,3 @@ def ensure_special_remote_exists_and_is_enabled(
     else:
         logger.debug("special remote %s found, enabling", name)
         repo.enable_remote(name)
-    print("ensure remote wurde beendet")

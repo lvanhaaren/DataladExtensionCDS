@@ -61,7 +61,7 @@ class CdsRemote(SpecialRemote):
 
         request_dict = ast.literal_eval(dictString)
         c = cdsapi.Client()
-        c.retrieve(string_server,request_dict, string_to)
+        c.retrieve(string_server,request_dict, filename)
 
     def _handle_url(self, url: str,filename) -> None:
         import datalad.api as da
@@ -99,12 +99,10 @@ class CdsRemote(SpecialRemote):
         return True
 
     def claimurl(self, url: str) -> bool:
-        #return url.startswith("cdsrequest:")
-        return True
+        return url.startswith("cdsrequest:")
 
     def checkurl(self, url: str) -> bool:
-        #return url.startswith("cdsrequest:")
-        return True
+        return url.startswith("cdsrequest:")
         
 
 def main():
