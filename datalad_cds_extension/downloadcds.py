@@ -97,10 +97,11 @@ class DownloadCDS(Interface):
         dataset=None, path=None, overwrite=False,
         archive=False, save=True, message=None
     ) -> Iterable[Dict]:
-        readfile = open(user_string_input)
-        readstr = readfile.read()
-        cmd = [readstr]
+        inputList = fileToList(user_string_input)
+        cmd = [inputList[0],inputList[1]]
         ds = None
+        if(not path):
+            path = inputList[2]
         try:
             ds = require_dataset(
                 dataset, check_installed=True,
@@ -160,3 +161,29 @@ def ensure_special_remote_exists_and_is_enabled(
     else:
         logger.debug("special remote %s found, enabling", name)
         repo.enable_remote(name)
+
+def fileToList(input_file) -> List[str]:
+    readfile = open(input_file)
+    readstr = readfile.read()
+
+    readstr=readstr.replace(" ","")
+
+
+    startDict = readstr.index('{')
+    endDict = readstr.index('}')
+    string_server = readstr[0:startDict]
+    dictString = readstr[startDict:endDict+1]
+    string_to = readstr[endDict+1:len(readstr)]
+
+    
+    string_server = string_server[1:len(string_server)-1]
+    string_to = string_to[1:len(string_to)-1]
+
+    string_server=string_server.replace(",","")
+    string_server=string_server.replace("\"","")
+    string_server=string_server.replace("'","")
+    string_to=string_to.replace(",","")
+    string_to=string_to.replace("\"","")
+    string_to=string_to.replace("'","")
+    return [string_server,dictString,string_to]
+
