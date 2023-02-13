@@ -130,7 +130,7 @@ class DownloadCDS(Interface):
             else cmd_message_full[:40] + " ..."
         )
         record = json.dumps(spec.to_dict(), indent=1, sort_keys=True)
-        msg = msg.format(cmd_message,
+        msg = msg.format(cmd_message if message is not None else cmd_message,
             record,
         )
         yield ds.save(pathobj, message=msg)
