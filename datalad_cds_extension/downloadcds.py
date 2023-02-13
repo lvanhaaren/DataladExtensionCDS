@@ -4,25 +4,17 @@ __docformat__ = 'restructuredtext'
 import os.path as op
 import json
 from typing import Dict, Iterable, List, Literal, Optional
-import datalad.local.download_url 
 from datalad.interface.base import Interface
 from datalad.interface.base import build_doc
 from datalad.support.param import Parameter
 from datalad.support.annexrepo import AnnexRepo
 from datalad.distribution.dataset import datasetmethod
 from datalad.interface.utils import eval_results
-from datalad.support.constraints import EnsureChoice
 from datalad.distribution.dataset import (
-    Dataset,
     EnsureDataset,
     datasetmethod,
     require_dataset,
     resolve_path
-)
-from datalad.utils import (
-    Path,
-    PurePosixPath,
-    ensure_list_from_str,
 )
 from datalad.support.constraints import (
     EnsureNone,
@@ -33,15 +25,11 @@ from datalad.interface.common_opts import (
     save_message_opt,
 )
 from datalad.support.exceptions import (
-    CapturedException,      
-    CommandError,
     NoDatasetFound,
 )
 
 from datalad.interface.results import get_status_dict
-#import datalad_cds_extension.downloadcds
 import datalad_cds_extension.cdsrequest
-import cdsapi
 from datalad_cds_extension.spec import Spec
 import logging
 logger = logging.getLogger('datalad.cds.datalad_cds')
@@ -147,7 +135,6 @@ class DownloadCDS(Interface):
         yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
 
-import datalad.local.download_url
 def ensure_special_remote_exists_and_is_enabled(
     repo: AnnexRepo, remote: Literal["cdsrequest"]
 ) -> None:
