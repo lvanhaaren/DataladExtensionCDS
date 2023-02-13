@@ -3,7 +3,7 @@
 __docformat__ = 'restructuredtext'
 import os.path as op
 import json
-from typing import Dict, Iterable, List, Literal, Optional
+from typing import Dict, Iterable, List, Literal
 from datalad.interface.base import Interface
 from datalad.interface.base import build_doc
 from datalad.support.param import Parameter
