@@ -15,7 +15,7 @@ High-level API commands
 .. autosummary::
    :toctree: generated
 
-   cds
+   download-cds
 
 
 Command line reference
