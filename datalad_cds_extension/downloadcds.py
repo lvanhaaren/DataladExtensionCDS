@@ -1,6 +1,7 @@
 """DataLad demo command"""
 
 __docformat__ = 'restructuredtext'
+import cdsapi
 import os.path as op
 import json
 from typing import Dict, Iterable, List, Literal
