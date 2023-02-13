@@ -3,7 +3,6 @@ import cdsapi
 import ast
 import inspect
 import logging
-import subprocess
 from typing import List
 
 from annexremote import Master, RemoteError, SpecialRemote
