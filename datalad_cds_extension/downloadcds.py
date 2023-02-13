@@ -3,26 +3,18 @@
 __docformat__ = 'restructuredtext'
 import os.path as op
 import json
-from typing import Dict, Iterable, List, Literal, Optional
-import datalad.local.download_url 
+from typing import Dict, Iterable, List, Literal
 from datalad.interface.base import Interface
 from datalad.interface.base import build_doc
 from datalad.support.param import Parameter
 from datalad.support.annexrepo import AnnexRepo
 from datalad.distribution.dataset import datasetmethod
 from datalad.interface.utils import eval_results
-from datalad.support.constraints import EnsureChoice
 from datalad.distribution.dataset import (
-    Dataset,
     EnsureDataset,
     datasetmethod,
     require_dataset,
     resolve_path
-)
-from datalad.utils import (
-    Path,
-    PurePosixPath,
-    ensure_list_from_str,
 )
 from datalad.support.constraints import (
     EnsureNone,
@@ -33,15 +25,11 @@ from datalad.interface.common_opts import (
     save_message_opt,
 )
 from datalad.support.exceptions import (
-    CapturedException,      
-    CommandError,
     NoDatasetFound,
 )
 
 from datalad.interface.results import get_status_dict
-#import datalad_cds_extension.downloadcds
 import datalad_cds_extension.cdsrequest
-import cdsapi
 from datalad_cds_extension.spec import Spec
 import logging
 logger = logging.getLogger('datalad.cds.datalad_cds')
@@ -109,10 +97,11 @@ class DownloadCDS(Interface):
         dataset=None, path=None, overwrite=False,
         archive=False, save=True, message=None
     ) -> Iterable[Dict]:
-        readfile = open(user_string_input)
-        readstr = readfile.read()
-        cmd = [readstr]
+        inputList = fileToList(user_string_input)
+        cmd = [inputList[0],inputList[1]]
         ds = None
+        if(not path):
+            path = inputList[2]
         try:
             ds = require_dataset(
                 dataset, check_installed=True,
@@ -147,7 +136,6 @@ class DownloadCDS(Interface):
         yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
 
-import datalad.local.download_url
 def ensure_special_remote_exists_and_is_enabled(
     repo: AnnexRepo, remote: Literal["cdsrequest"]
 ) -> None:
@@ -173,3 +161,29 @@ def ensure_special_remote_exists_and_is_enabled(
     else:
         logger.debug("special remote %s found, enabling", name)
         repo.enable_remote(name)
+
+def fileToList(input_file) -> List[str]:
+    readfile = open(input_file)
+    readstr = readfile.read()
+
+    readstr=readstr.replace(" ","")
+
+
+    startDict = readstr.index('{')
+    endDict = readstr.index('}')
+    string_server = readstr[0:startDict]
+    dictString = readstr[startDict:endDict+1]
+    string_to = readstr[endDict+1:len(readstr)]
+
+    
+    string_server = string_server[1:len(string_server)-1]
+    string_to = string_to[1:len(string_to)-1]
+
+    string_server=string_server.replace(",","")
+    string_server=string_server.replace("\"","")
+    string_server=string_server.replace("'","")
+    string_to=string_to.replace(",","")
+    string_to=string_to.replace("\"","")
+    string_to=string_to.replace("'","")
+    return [string_server,dictString,string_to]
+

@@ -3,7 +3,6 @@ import cdsapi
 import ast
 import inspect
 import logging
-import subprocess
 from typing import List
 
 from annexremote import Master, RemoteError, SpecialRemote
@@ -39,29 +38,9 @@ class CdsRemote(SpecialRemote):
         logger.debug("downloading %s", user_input)
         #self.annex.info("executing {}".format(user_input))
 
-        user_input=user_input.replace(" ","")
-
-
-        startDict = user_input.index('{')
-        endDict = user_input.index('}')
-        string_server = user_input[0:startDict]
-        dictString = user_input[startDict:endDict+1]
-        string_to = user_input[endDict+1:len(user_input)]
-
-        
-        string_server = string_server[1:len(string_server)-1]
-        string_to = string_to[1:len(string_to)-1]
-
-        string_server=string_server.replace(",","")
-        string_server=string_server.replace("\"","")
-        string_server=string_server.replace("'","")
-        string_to=string_to.replace(",","")
-        string_to=string_to.replace("\"","")
-        string_to=string_to.replace("'","")
-
-        request_dict = ast.literal_eval(dictString)
+        request_dict = ast.literal_eval(list[1])
         c = cdsapi.Client()
-        c.retrieve(string_server,request_dict, filename)
+        c.retrieve(list[0],request_dict,filename)
 
     def _handle_url(self, url: str,filename) -> None:
         import datalad.api as da
