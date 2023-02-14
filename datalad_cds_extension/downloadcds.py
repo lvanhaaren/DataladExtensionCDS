@@ -33,7 +33,7 @@ from datalad.interface.results import get_status_dict
 import datalad_cds_extension.cdsrequest
 from datalad_cds_extension.spec import Spec
 import logging
-logger = logging.getLogger('datalad.cds.datalad_cds')
+logger = logging.getLogger('datalad.cds.download-cds')
 
 
 # decoration auto-generates standard help
