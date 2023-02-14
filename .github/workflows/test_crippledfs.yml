@@ -28,10 +28,10 @@ jobs:
         git config --global user.email "test@github.land"
         git config --global user.name "GitHub Almighty"
     - uses: actions/checkout@v3
-    - name: Set up Python 3.7
+    - name: Set up Python 3.10.8
       uses: actions/setup-python@v4
       with:
-        python-version: 3.7
+        python-version: 3.10.8
     - name: Install dependencies
       run: |
         pip install -r requirements-devel.txt
@@ -52,4 +52,4 @@ jobs:
         echo "== mount >>"
         mount
         echo "<< mount =="
-        python -m pytest -s -v --doctest-modules --cov=download-cdss --pyargs download-cdss
+        python -m pytest -s -v --doctest-modules --cov=download-cds --pyargs download-cds
