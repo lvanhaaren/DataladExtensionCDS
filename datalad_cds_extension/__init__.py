@@ -15,7 +15,7 @@ command_suite = (
         # specification of a command, any number of commands can be defined
         (
             # importable module that contains the command implementation
-            'datalad_cds_extension.download-cds',
+            'datalad_cds_extension.downloadcds',
             # name of the command class implementation in above module
             'DownloadCDS',
             # optional name of the command in the cmdline API
