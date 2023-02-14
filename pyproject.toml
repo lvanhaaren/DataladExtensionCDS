@@ -21,6 +21,7 @@ dynamic = ["version"]
 dependencies = [
   "datalad>=0.17.0",
   "annexremote>=1.6.0",
+  "cdsapi>=0.5.1",
 ]
 [project.entry-points."datalad.extensions"]
 download-cds = "datalad_cds_extension:command_suite"
