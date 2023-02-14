@@ -52,4 +52,4 @@ jobs:
         echo "== mount >>"
         mount
         echo "<< mount =="
-        python -m pytest -s -v --doctest-modules --cov=datalad_cds --pyargs datalad_cds
+        python -m pytest -s -v --doctest-modules --cov=datalad_cds_extension --pyargs datalad_cds_extension
