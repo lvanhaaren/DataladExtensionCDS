@@ -1,28 +1,21 @@
 """DataLad demo command"""
 
 __docformat__ = 'restructuredtext'
+import cdsapi
 import os.path as op
 import json
-from typing import Dict, Iterable, List, Literal, Optional
-import datalad.local.download_url 
+from typing import Dict, Iterable, List, Literal
 from datalad.interface.base import Interface
 from datalad.interface.base import build_doc
 from datalad.support.param import Parameter
 from datalad.support.annexrepo import AnnexRepo
 from datalad.distribution.dataset import datasetmethod
 from datalad.interface.utils import eval_results
-from datalad.support.constraints import EnsureChoice
 from datalad.distribution.dataset import (
-    Dataset,
     EnsureDataset,
     datasetmethod,
     require_dataset,
     resolve_path
-)
-from datalad.utils import (
-    Path,
-    PurePosixPath,
-    ensure_list_from_str,
 )
 from datalad.support.constraints import (
     EnsureNone,
@@ -33,18 +26,14 @@ from datalad.interface.common_opts import (
     save_message_opt,
 )
 from datalad.support.exceptions import (
-    CapturedException,      
-    CommandError,
     NoDatasetFound,
 )
 
 from datalad.interface.results import get_status_dict
-#import datalad_cds_extension.downloadcds
 import datalad_cds_extension.cdsrequest
-import cdsapi
 from datalad_cds_extension.spec import Spec
 import logging
-logger = logging.getLogger('datalad.cds.datalad_cds')
+logger = logging.getLogger('datalad.cds.download-cds')
 
 
 # decoration auto-generates standard help
@@ -109,71 +98,26 @@ class DownloadCDS(Interface):
         dataset=None, path=None, overwrite=False,
         archive=False, save=True, message=None
     ) -> Iterable[Dict]:
-        print("Test")
-        readfile = open(user_string_input)
-        readstr = readfile.read()
-        cmd = [readstr]
+        inputList = fileToList(user_string_input)
+        cmd = [inputList[0],inputList[1]]
         ds = None
-        if save or dataset:
-            try:
-                ds = require_dataset(
-                    dataset, check_installed=True,
-                    purpose='download cds')
-            except NoDatasetFound:
-                pass
-
-        common_report = {"action": "download_cds", 
-                         "ds": ds}
-
-        got_ds_instance = isinstance(dataset, Dataset)
-        dir_is_target = not path or str(path).endswith(op.sep)
+        if(not path):
+            path = inputList[2]
+        try:
+            ds = require_dataset(
+                dataset, check_installed=True,
+                purpose='download cds')
+        except NoDatasetFound:
+            pass
         path = str(resolve_path(path or op.curdir, ds=dataset))
-        if dir_is_target:
-            # resolve_path() doesn't preserve trailing separators. Add one for
-            # the download() call.
-            path = path + op.sep
-
-        if not dir_is_target:
-            if archive:
-                # make sure the file suffix indicated by a URL is preserved
-                # so that any further archive processing doesn't have to
-                # employ mime type inspection in order to determine the archive
-                # type
-                from datalad.support.network import URL
-                suffixes = PurePosixPath(URL(user_string_input).path).suffixes
-                if not Path(path).suffixes == suffixes:
-                    path += ''.join(suffixes)
-            # we know that we have a single URL
-            # download() would be fine getting an existing directory and
-            # downloading the URL underneath it, but let's enforce a trailing
-            # slash here for consistency.
-            if op.isdir(path):
-                yield get_status_dict(
-                    status="error",
-                    message=(
-                        "Non-directory path given (no trailing separator) "
-                        "but a directory with that name (after adding archive "
-                        "suffix) exists"),
-                    type="file",
-                    path=path,
-                    **common_report)
-                return
-        print("Zeile 161")
-        spec = Spec(cmd,[])
+        spec = Spec(cmd,None)
         logger.debug("spec is %s", spec)
         url = spec.to_url()
         logger.debug("url is %s", url)
-
         pathobj = ds.pathobj / path
-        print(pathobj)
-        print(url)
         logger.debug("target path is %s", pathobj)
-
-        print("Zeile 170")
-
         ensure_special_remote_exists_and_is_enabled(ds.repo, "cdsrequest")
         ds.repo.add_url_to_file(pathobj, url)
-        print("Zeile 174")
         msg = """\
 [DATALAD cdsrequest] {}
 === Do not change lines below ===
@@ -181,21 +125,17 @@ class DownloadCDS(Interface):
 ^^^ Do not change lines above ^^^
         """
         cmd_message_full = "'" + "' '".join(spec.cmd) + "'"
-        print("Zeile 180")
-
         cmd_message = (
             cmd_message_full
             if len(cmd_message_full) <= 40
             else cmd_message_full[:40] + " ..."
         )
         record = json.dumps(spec.to_dict(), indent=1, sort_keys=True)
-        msg = msg.format(cmd_message,
+        msg = msg.format(cmd_message if message is not None else cmd_message,
             record,
         )
-        print("Zeile 192")
         yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
-
 
 def ensure_special_remote_exists_and_is_enabled(
     repo: AnnexRepo, remote: Literal["cdsrequest"]
@@ -222,4 +162,29 @@ def ensure_special_remote_exists_and_is_enabled(
     else:
         logger.debug("special remote %s found, enabling", name)
         repo.enable_remote(name)
-    print("ensure remote wurde beendet")
+
+def fileToList(input_file) -> List[str]:
+    readfile = open(input_file)
+    readstr = readfile.read()
+
+    readstr=readstr.replace(" ","")
+
+
+    startDict = readstr.index('{')
+    endDict = readstr.index('}')
+    string_server = readstr[0:startDict]
+    dictString = readstr[startDict:endDict+1]
+    string_to = readstr[endDict+1:len(readstr)]
+
+    
+    string_server = string_server[1:len(string_server)-1]
+    string_to = string_to[1:len(string_to)-1]
+
+    string_server=string_server.replace(",","")
+    string_server=string_server.replace("\"","")
+    string_server=string_server.replace("'","")
+    string_to=string_to.replace(",","")
+    string_to=string_to.replace("\"","")
+    string_to=string_to.replace("'","")
+    return [string_server,dictString,string_to]
+

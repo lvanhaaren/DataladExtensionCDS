@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-
 import cdsapi
 import ast
 import inspect
 import logging
-import subprocess
 from typing import List
 
 from annexremote import Master, RemoteError, SpecialRemote
@@ -35,36 +33,16 @@ class CdsRemote(SpecialRemote):
     def prepare(self) -> None:
         pass
 
-    def _execute_cds(self, list: List[str]) -> None:
+    def _execute_cds(self, list: List[str],filename) -> None:
         user_input = list[0]
         logger.debug("downloading %s", user_input)
-        self.annex.info("downloading {}".format(user_input))
+        #self.annex.info("executing {}".format(user_input))
 
-        user_input=user_input.replace(" ","")
-
-
-        startDict = user_input.index('{')
-        endDict = user_input.index('}')
-        string_server = user_input[0:startDict]
-        dictString = user_input[startDict:endDict+1]
-        string_to = user_input[endDict+1:len(user_input)]
-
-        
-        string_server = string_server[1:len(string_server)-1]
-        string_to = string_to[1:len(string_to)-1]
-
-        string_server=string_server.replace(",","")
-        string_server=string_server.replace("\"","")
-        string_server=string_server.replace("'","")
-        string_to=string_to.replace(",","")
-        string_to=string_to.replace("\"","")
-        string_to=string_to.replace("'","")
-
-        request_dict = ast.literal_eval(dictString)
+        request_dict = ast.literal_eval(list[1])
         c = cdsapi.Client()
-        c.retrieve(string_server,request_dict, string_to)
+        c.retrieve(list[0],request_dict,filename)
 
-    def _handle_url(self, url: str) -> None:
+    def _handle_url(self, url: str,filename) -> None:
         import datalad.api as da
         from datalad.utils import swallow_outputs
 
@@ -76,10 +54,9 @@ class CdsRemote(SpecialRemote):
                 da.get(set(inputs))
                 logger.info("datalad get output: %s", cm.out)
         cmd = spec.cmd
-        self._execute_cds(cmd)
+        self._execute_cds(cmd,filename)
 
-    def transfer_retrieve(self, key: str) -> None:
-        print("transfer_retrieve wird aufgerufen")
+    def transfer_retrieve(self, key: str,filename) -> None:
         logger.debug(
             "%s called with key %s and filename %s",
             inspect.stack()[0][3],
@@ -89,7 +66,7 @@ class CdsRemote(SpecialRemote):
         logger.debug("urls for this key: %s", urls)
         for url in urls:
             try:
-                self._handle_url(url)
+                self._handle_url(url,filename)
                 break
             except HandleUrlError:
                 pass

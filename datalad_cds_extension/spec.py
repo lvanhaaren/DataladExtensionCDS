@@ -6,8 +6,6 @@ import urllib.parse
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
 
-from datalad_cds_extension import compat
-
 
 @dataclass
 class Spec:
@@ -28,7 +26,7 @@ class Spec:
             spec = cls.from_json(
                 base64.urlsafe_b64decode(
                     urllib.parse.unquote(
-                        compat.removeprefix(url, "cdsrequest:v1-")
+                        url.replace("cdsrequest:v1-","")
                     ).encode("utf-8")
                 ).decode("utf-8")
             )
@@ -36,11 +34,9 @@ class Spec:
         raise ValueError("unsupported URL value encountered")
 
     def to_dict(self) -> Dict[str, Any]:
-        print("asdict:",asdict(self))
         return asdict(self)
 
     def to_json(self) -> str:
-        print("to_json",json.dumps(self.to_dict(), separators=(",", ":")))
         return json.dumps(self.to_dict(), separators=(",", ":"))
 
     def to_url(self) -> str:

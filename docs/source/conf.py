@@ -40,7 +40,7 @@ for setup_py_path in (opj(pardir, 'setup.py'),  # travis
         try:
             subprocess.run(
                 args=[setup_py_path, 'build_manpage',
-                     '--cmdsuite', 'datalad_cds:command_suite',
+                     '--cmdsuite', 'datalad_cds_extension:command_suite',
                      '--manpath', abspath(opj(
                          dirname(setup_py_path), 'build', 'man')),
                      '--rstpath', opj(dirname(__file__), 'generated', 'man'),
