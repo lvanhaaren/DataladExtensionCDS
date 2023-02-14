@@ -6,8 +6,6 @@ import urllib.parse
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
 
-from datalad_cds_extension import compat
-
 
 @dataclass
 class Spec:
@@ -28,7 +26,7 @@ class Spec:
             spec = cls.from_json(
                 base64.urlsafe_b64decode(
                     urllib.parse.unquote(
-                        compat.removeprefix(url, "cdsrequest:v1-")
+                        url.replace("cdsrequest:v1-","")
                     ).encode("utf-8")
                 ).decode("utf-8")
             )
