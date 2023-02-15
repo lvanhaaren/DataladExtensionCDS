@@ -124,16 +124,11 @@ class DownloadCDS(Interface):
         msg = """\
 [DATALAD cdsrequest] {}
 === Do not change lines below ===
+This was the request:
 {}
 ^^^ Do not change lines above ^^^
         """
-        cmd_message_full = "'" + "' '".join(request_str) + "'"
-        cmd_message = (
-            cmd_message_full
-            if len(cmd_message_full) <= 40
-            else cmd_message_full[:40] + " ..."
-        )
-        msg = msg.format(cmd_message if message is not None else cmd_message,
+        msg = msg.format(message if message is not None else "",
             request_str,
         )
         yield ds.save(pathobj, message=msg)
