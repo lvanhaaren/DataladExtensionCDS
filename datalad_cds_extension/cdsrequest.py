@@ -8,6 +8,7 @@ from typing import List
 from annexremote import Master, RemoteError, SpecialRemote
 
 from datalad_cds_extension.spec import Spec
+from datalad_cds_extension.downloadcds import fromUrl
 
 
 logger = logging.getLogger("datalad.download-cds.cdsrequest")
@@ -33,28 +34,16 @@ class CdsRemote(SpecialRemote):
     def prepare(self) -> None:
         pass
 
-    def _execute_cds(self, list: List[str],filename) -> None:
-        user_input = list[0]
-        logger.debug("downloading %s", user_input)
-        #self.annex.info("executing {}".format(user_input))
+    def _execute_cds(self, request: str,filename) -> None:
+        dictStart=request.index("{")
+        dataset_to = request[0:dictStart]
+        request_dict_str = request[dictStart:len(request)]
+        logger.debug("downloading %s", dataset_to)
+        #self.annex.info("executing {}".format(dataset_to))
 
-        request_dict = ast.literal_eval(list[1])
+        request_dict = ast.literal_eval(request_dict_str)
         c = cdsapi.Client()
-        c.retrieve(list[0],request_dict,filename)
-
-    def _handle_url(self, url: str,filename) -> None:
-        import datalad.api as da
-        from datalad.utils import swallow_outputs
-
-        spec = Spec.from_url(url)
-        inputs = spec.inputs
-        if inputs:
-            with swallow_outputs() as cm:
-                logger.info("fetching inputs: %s", inputs)
-                da.get(set(inputs))
-                logger.info("datalad get output: %s", cm.out)
-        cmd = spec.cmd
-        self._execute_cds(cmd,filename)
+        c.retrieve(dataset_to,request_dict,filename)
 
     def transfer_retrieve(self, key: str,filename) -> None:
         logger.debug(
@@ -65,11 +54,7 @@ class CdsRemote(SpecialRemote):
         urls = self.annex.geturls(key, "cdsrequest:")
         logger.debug("urls for this key: %s", urls)
         for url in urls:
-            try:
-                self._handle_url(url,filename)
-                break
-            except HandleUrlError:
-                pass
+            self._execute_cds(fromUrl(url),filename)
         else:
             raise RemoteError("Failed to handle key {}".format(key))
 
