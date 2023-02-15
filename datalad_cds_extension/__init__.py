@@ -21,7 +21,7 @@ command_suite = (
             # optional name of the command in the cmdline API
             'download-cds',
             # optional name of the command in the Python API
-            'download-cds'
+            'download_cds'
         ),
     ]
 )
