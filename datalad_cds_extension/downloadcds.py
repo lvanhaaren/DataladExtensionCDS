@@ -1,4 +1,4 @@
-"""DataLad demo command"""
+"""DataLad cds downloader"""
 
 __docformat__ = 'restructuredtext'
 import base64
