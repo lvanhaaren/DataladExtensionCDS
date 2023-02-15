@@ -3,9 +3,7 @@
 __docformat__ = 'restructuredtext'
 import base64
 import urllib.parse
-import cdsapi
 import os.path as op
-import json
 from typing import Dict, Iterable, List, Literal
 from datalad.interface.base import Interface
 from datalad.interface.base import build_doc
@@ -52,7 +50,6 @@ class DownloadCDS(Interface):
     _params_ = dict(
 
         user_string_input=Parameter(
-            
             doc="""json file with retrieve request"""),
         dataset=Parameter(
             args=("-d", "--dataset"),
@@ -62,10 +59,12 @@ class DownloadCDS(Interface):
             working directory. Use [CMD: --nosave CMD][PY: save=False PY] to
             prevent adding files to the dataset.""",
             constraints=EnsureDataset() | EnsureNone()),
+
         overwrite=Parameter(
             args=("-o", "--overwrite"),
             action="store_true",
             doc="""flag to overwrite it if target file exists"""),
+
         path=Parameter(
             args=("-O", "--path"),
             doc="""target for download. If the path has a trailing separator,
@@ -77,13 +76,16 @@ class DownloadCDS(Interface):
             In both cases, leading directories will be created if needed. This
             argument defaults to the current directory.""",
             constraints=EnsureStr() | EnsureNone()),
+
         archive=Parameter(
             args=("--archive",),
             action="store_true",
             doc="""pass the downloaded files to [CMD: :command:`datalad
             add-archive-content --delete` CMD][PY: add_archive_content(...,
             delete=True) PY]"""),
+
         save=nosave_opt,
+
         message=save_message_opt
     )
 
@@ -99,6 +101,7 @@ class DownloadCDS(Interface):
         dataset=None, path=None, overwrite=False,
         archive=False, save=True, message=None
     ) -> Iterable[Dict]:
+        
         inputList = fileToList(user_string_input)
         request_str = inputList[0]
         ds = None
@@ -108,19 +111,23 @@ class DownloadCDS(Interface):
             if(not op.exists(path)):
                 raise ValueError("The path in the file is not valid!")
             """
+
         try:
             ds = require_dataset(
                 dataset, check_installed=True,
                 purpose='download cds')
         except NoDatasetFound:
             pass
+
         path = str(resolve_path(path or op.curdir, ds=dataset))
         url = toUrl(request_str)
         logger.debug("url is %s", url)
         pathobj = ds.pathobj / path
         logger.debug("target path is %s", pathobj)
+
         ensure_special_remote_exists_and_is_enabled(ds.repo, "cdsrequest")
         ds.repo.add_url_to_file(pathobj, url)
+
         msg = """\
 [DATALAD cdsrequest] {}
 === Do not change lines below ===
@@ -128,20 +135,33 @@ This was the request:
 {}
 ^^^ Do not change lines above ^^^
         """
+
         msg = msg.format(message if message is not None else "",
             request_str,
         )
+        
         yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
+        if(archive):
+            yield from ds.add_archive_content(
+                                pathobj,
+                                delete=True,
+                                on_failure='ignore',
+                                return_type='generator',
+                                result_renderer='disabled'
+                            )
 
 def ensure_special_remote_exists_and_is_enabled(
     repo: AnnexRepo, remote: Literal["cdsrequest"]
 ) -> None:
+    
     """Initialize and enable the cdsrequest special remote, if it isn't already.
     Very similar to datalad.customremotes.base.ensure_datalad_remote.
     """
+
     uuids = {"cdsrequest": datalad_cds_extension.cdsrequest.cdsrequest_REMOTE_UUID}
     uuid = uuids[remote]
+
     name = repo.get_special_remotes().get(uuid, {}).get("name")
     if not name:
         repo.init_remote(
@@ -154,8 +174,10 @@ def ensure_special_remote_exists_and_is_enabled(
                 "uuid={}".format(uuid),
             ],
         )
+
     elif repo.is_special_annex_remote(name, check_if_known=False):
         logger.debug("special remote %s is enabled", name)
+
     else:
         logger.debug("special remote %s found, enabling", name)
         repo.enable_remote(name)
@@ -163,9 +185,6 @@ def ensure_special_remote_exists_and_is_enabled(
 def fileToList(input_file) -> List[str]:
     readfile = open(input_file)
     readstr = readfile.read()
-
-    readstr=readstr.replace(" ","")
-
 
     startDict = readstr.index('{')
     endDict = readstr.index('}')
@@ -176,15 +195,21 @@ def fileToList(input_file) -> List[str]:
     dictString.replace("\n","")
     string_server = string_server[1:len(string_server)-1]
     string_to = string_to[1:len(string_to)-1]
+
     string_server=string_server.replace("\n","")
     string_server=string_server.replace(",","")
     string_server=string_server.replace("\"","")
     string_server=string_server.replace("'","")
+    string_server=string_server.replace(" ","")
+
     string_to=string_to.replace(",","")
     string_to=string_to.replace("\"","")
     string_to=string_to.replace("'","")
     string_to=string_to.replace("\n","")
+    string_to=string_to.replace(" ","")
+
     return [string_server+dictString,string_to]
 
 def toUrl(request: str):
+
     return "cdsrequest:v1-" + urllib.parse.quote(base64.urlsafe_b64encode(request.encode("utf-8")))
