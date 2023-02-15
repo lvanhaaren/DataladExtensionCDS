@@ -1,6 +1,8 @@
 """DataLad demo command"""
 
 __docformat__ = 'restructuredtext'
+import base64
+import urllib.parse
 import cdsapi
 import os.path as op
 import json
@@ -99,10 +101,12 @@ class DownloadCDS(Interface):
         archive=False, save=True, message=None
     ) -> Iterable[Dict]:
         inputList = fileToList(user_string_input)
-        cmd = [inputList[0],inputList[1]]
+        request_str = inputList[0]
         ds = None
         if(not path):
-            path = inputList[2]
+            path = inputList[1]
+            if(not op.exists(path)):
+                raise ValueError("The p ath in the file is not valid!")
         try:
             ds = require_dataset(
                 dataset, check_installed=True,
@@ -110,9 +114,7 @@ class DownloadCDS(Interface):
         except NoDatasetFound:
             pass
         path = str(resolve_path(path or op.curdir, ds=dataset))
-        spec = Spec(cmd,None)
-        logger.debug("spec is %s", spec)
-        url = spec.to_url()
+        url = toUrl(request_str)
         logger.debug("url is %s", url)
         pathobj = ds.pathobj / path
         logger.debug("target path is %s", pathobj)
@@ -124,15 +126,14 @@ class DownloadCDS(Interface):
 {}
 ^^^ Do not change lines above ^^^
         """
-        cmd_message_full = "'" + "' '".join(spec.cmd) + "'"
+        cmd_message_full = "'" + "' '".join(request_str) + "'"
         cmd_message = (
             cmd_message_full
             if len(cmd_message_full) <= 40
             else cmd_message_full[:40] + " ..."
         )
-        record = json.dumps(spec.to_dict(), indent=1, sort_keys=True)
         msg = msg.format(cmd_message if message is not None else cmd_message,
-            record,
+            request_str,
         )
         yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
@@ -187,5 +188,18 @@ def fileToList(input_file) -> List[str]:
     string_to=string_to.replace("\"","")
     string_to=string_to.replace("'","")
     string_to=string_to.replace("\n","")
-    return [string_server,dictString,string_to]
+    return [string_server+dictString,string_to]
 
+def toUrl(request: str):
+    return "cdsrequest:v1-" + urllib.parse.quote(base64.urlsafe_b64encode(request.encode("utf-8")))
+
+def fromUrl(url: str)->str:
+    if not url.startswith("cdsrequest:v1-"):
+        raise ValueError("unsupported URL value encountered")
+    return (
+        base64.urlsafe_b64decode(
+            urllib.parse.unquote(
+                url.replace("cdsrequest:v1-","")
+            ).encode("utf-8")
+        ).decode("utf-8")
+    )
