@@ -15,7 +15,7 @@ High-level API commands
 .. autosummary::
    :toctree: generated
 
-   download-cds
+   download_cds
 
 
 Command line reference
@@ -24,7 +24,7 @@ Command line reference
 .. toctree::
    :maxdepth: 1
 
-   generated/man/datalad_cds_extension
+   generated/man/datalad-download-cds
 
 
 Indices and tables
