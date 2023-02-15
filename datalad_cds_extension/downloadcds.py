@@ -176,15 +176,16 @@ def fileToList(input_file) -> List[str]:
     dictString = readstr[startDict:endDict+1]
     string_to = readstr[endDict+1:len(readstr)]
 
-    
+    dictString.replace("\n","")
     string_server = string_server[1:len(string_server)-1]
     string_to = string_to[1:len(string_to)-1]
-
+    string_server=string_server.replace("\n","")
     string_server=string_server.replace(",","")
     string_server=string_server.replace("\"","")
     string_server=string_server.replace("'","")
     string_to=string_to.replace(",","")
     string_to=string_to.replace("\"","")
     string_to=string_to.replace("'","")
+    string_to=string_to.replace("\n","")
     return [string_server,dictString,string_to]
 
