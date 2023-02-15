@@ -1,5 +1,23 @@
 # DataLad CDS Extension
 
+## Set up
+Clone this repository and run
+
+    pip install -e .
+
+Make sure you have valid credentials for the cds api!
+If you're not registered yet, here is the manual:
+https://cds.climate.copernicus.eu/user/register?destination=%2F%23!%2Fhome \
+Create a datalad dataset:
+
+    datalad create -c text2git DataLad-101
+Change to the dataset:
+
+    cd Datalad-101
+
+Now you can execute the datalad-download-cds command!
+
+## Usage
 Extension for the automatic download from the CDS DataStore.
 Works like `datalad download-url`
 
