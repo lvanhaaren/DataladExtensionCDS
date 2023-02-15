@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import urllib
+import base64
 import cdsapi
 import ast
 import inspect
@@ -7,8 +9,7 @@ from typing import List
 
 from annexremote import Master, RemoteError, SpecialRemote
 
-from datalad_cds_extension.spec import Spec
-from datalad_cds_extension.downloadcds import fromUrl
+
 
 
 logger = logging.getLogger("datalad.download-cds.cdsrequest")
@@ -19,6 +20,16 @@ cdsrequest_REMOTE_UUID = "1da43985-0b6e-4123-89f0-90b88021ed34"
 class HandleUrlError(Exception):
     pass
 
+def fromUrl(url: str)->str:
+    if not url.startswith("cdsrequest:v1-"):
+        raise ValueError("unsupported URL value encountered")
+    return (
+        base64.urlsafe_b64decode(
+            urllib.parse.unquote(
+                url.replace("cdsrequest:v1-","")
+            ).encode("utf-8")
+        ).decode("utf-8")
+    )
 
 class CdsRemote(SpecialRemote):
 
@@ -55,8 +66,6 @@ class CdsRemote(SpecialRemote):
         logger.debug("urls for this key: %s", urls)
         for url in urls:
             self._execute_cds(fromUrl(url),filename)
-        else:
-            raise RemoteError("Failed to handle key {}".format(key))
 
     def checkpresent(self, key: str) -> bool:
         # We just assume that we can always handle the key

@@ -33,7 +33,6 @@ from datalad.support.exceptions import (
 
 from datalad.interface.results import get_status_dict
 import datalad_cds_extension.cdsrequest
-from datalad_cds_extension.spec import Spec
 import logging
 logger = logging.getLogger('datalad.cds.download-cds')
 
@@ -105,8 +104,10 @@ class DownloadCDS(Interface):
         ds = None
         if(not path):
             path = inputList[1]
+            """
             if(not op.exists(path)):
-                raise ValueError("The p ath in the file is not valid!")
+                raise ValueError("The path in the file is not valid!")
+            """
         try:
             ds = require_dataset(
                 dataset, check_installed=True,
@@ -192,14 +193,3 @@ def fileToList(input_file) -> List[str]:
 
 def toUrl(request: str):
     return "cdsrequest:v1-" + urllib.parse.quote(base64.urlsafe_b64encode(request.encode("utf-8")))
-
-def fromUrl(url: str)->str:
-    if not url.startswith("cdsrequest:v1-"):
-        raise ValueError("unsupported URL value encountered")
-    return (
-        base64.urlsafe_b64decode(
-            urllib.parse.unquote(
-                url.replace("cdsrequest:v1-","")
-            ).encode("utf-8")
-        ).decode("utf-8")
-    )
