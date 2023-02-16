@@ -39,14 +39,12 @@ logger = logging.getLogger('datalad.cds.download-cds')
 @build_doc
 # all commands must be derived from Interface
 class DownloadCDS(Interface):
-    # first docstring line is used a short description in the cmdline help
-    # the rest is put in the verbose help and manpage
-    """Short description of the command
 
-    Long description of arbitrary volume.
+    """Short description of the command: download-cds       
+
+    Long description of arbitrary volume: downloads from the CDS 
     """
 
-    # parameters of the command, must be exhaustive
     _params_ = dict(
 
         user_string_input=Parameter(
@@ -90,12 +88,8 @@ class DownloadCDS(Interface):
     )
 
     @staticmethod
-    # decorator binds the command to the Dataset class as a method
     @datasetmethod(name='download_cds')
-    # generic handling of command results (logging, rendering, filtering, ...)
     @eval_results
-    # signature must match parameter list above
-    # additional generic arguments are added by decorators
     def __call__(
         user_string_input,
         dataset=None, path=None, overwrite=False,
