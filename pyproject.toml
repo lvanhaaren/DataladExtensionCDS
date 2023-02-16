@@ -30,3 +30,6 @@ download-cds = "datalad_cds_extension:command_suite"
 requires = ["setuptools >= 43.0.0", "wheel"]
 [project.scripts]
 git-annex-remote-cdsrequest = "datalad_cds_extension.cdsrequest:main"
+
+[project.urls]
+"Homepage"="https://github.com/lvanhaaren/DataladExtensionCDS"
