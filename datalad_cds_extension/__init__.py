@@ -3,14 +3,18 @@
 __docformat__ = 'restructuredtext'
 
 import logging
+
+from . import _version
 lgr = logging.getLogger('datalad.downloadcds')
+
+__version__=_version.get_versions()["version"]
 
 # Defines a datalad command suite.
 # This variable must be bound as a setuptools entrypoint
 # to be found by datalad
 command_suite = (
     # description of the command suite, displayed in cmdline help
-    "TestNachricht",
+    "DataLad download-cds command suite",
     [
         # specification of a command, any number of commands can be defined
         (
