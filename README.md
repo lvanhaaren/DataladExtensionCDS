@@ -1,47 +1,73 @@
-# DataLad extension template
+# DataLad CDS Extension
 
-[![Build status](https://ci.appveyor.com/api/projects/status/g9von5wtpoidcecy/branch/main?svg=true)](https://ci.appveyor.com/project/mih/datalad-extension-template/branch/main) [![codecov.io](https://codecov.io/github/datalad/datalad-extension-template/coverage.svg?branch=main)](https://codecov.io/github/datalad/datalad-extension-template?branch=main) [![crippled-filesystems](https://github.com/datalad/datalad-extension-template/workflows/crippled-filesystems/badge.svg)](https://github.com/datalad/datalad-extension-template/actions?query=workflow%3Acrippled-filesystems) [![docs](https://github.com/datalad/datalad-extension-template/workflows/docs/badge.svg)](https://github.com/datalad/datalad-extension-template/actions?query=workflow%3Adocs)
-
-
-This repository contains an extension template that can serve as a starting point
-for implementing a [DataLad](http://datalad.org) extension. An extension can
-provide any number of additional DataLad commands that are automatically
-included in DataLad's command line and Python API.
-
-For a demo, clone this repository and install the demo extension via
+## Set up
+Clone this repository and run
 
     pip install -e .
 
-DataLad will now expose a new command suite with a `hello...` command.
+Make sure you have valid credentials for the cds api!
+If you're not registered yet, here is the manual:
+https://cds.climate.copernicus.eu/user/register?destination=%2F%23!%2Fhome \
+Create a datalad dataset:
 
-    % datalad --help |grep -B2 -A2 hello
-    *Demo DataLad command suite*
+    datalad create -c text2git DataLad-101
+Change to the dataset:
 
-      hello-cmd
-          Short description of the command
+    cd Datalad-101
 
-To start implementing your own extension, [use this
-template](https://github.com/datalad/datalad-extension-template/generate), and
-adjust as necessary. A good approach is to
+Now you can execute the datalad-download-cds command!
 
-- Pick a name for the new extension.
-- Look through the sources and replace `helloworld` with
-  `<newname>` (hint: `git grep helloworld` should find all
-  spots).
-- Delete the example command implementation in `datalad_helloworld/hello_cmd.py`.
-- Implement a new command, and adjust the `command_suite` in
-  `datalad_helloworld/__init__.py` to point to it.
-- Replace `hello_cmd` with the name of the new command in
-  `datalad_helloworld/tests/test_register.py` to automatically test whether the
-  new extension installs correctly.
-- Adjust the documentation in `docs/source/index.rst`. Refer to [`docs/README.md`](docs/README.md) for more information on documentation building, testing and publishing.
-- Replace this README, and/or update the links in the badges at the top.
-- Update `setup.cfg` with appropriate metadata on the new extension.
+## Usage
+Extension for the automatic download from the CDS DataStore.
+Works like `datalad download-url`
 
-You can consider filling in the provided [.zenodo.json](.zenodo.json) file with
-contributor information and [meta data](https://developers.zenodo.org/#representation)
-to acknowledge contributors and describe the publication record that is created when
-[you make your code citeable](https://guides.github.com/activities/citable-code/)
-by archiving it using [zenodo.org](https://zenodo.org/). You may also want to
-consider acknowledging contributors with the
-[allcontributors bot](https://allcontributors.org/docs/en/bot/overview).
+
+In general a command looks like this:
+
+      datalad download-cds [-h] [-d PATH] [-O PATH] [-o] [--archive] [--nosave] [-m MESSAGE]
+      [--version] filenames
+
+Example:
+
+    datalad download-cds test.txt -m "This is the commit message"
+
+In this case test.txt contains a cds request.
+
+    'derived-utci-historical',{
+      'version': '1_1',
+      'format': 'zip',
+      'variable': 'universal_thermal_climate_index',
+      'product_type': 'intermediate_dataset',
+      'year': '2020',
+      'month': '01',
+      'day': '01',
+    }, 'test4.zip'
+You can generate yourself the request here:
+https://cds.climate.copernicus.eu/cdsapp#!/search?type=dataset
+
+## Options
+
+### filename
+This is the file, in which the cds request is stored
+
+### -h, --help
+Shows the help message, --help shows the man page
+
+### -d PATH, --dataset PATH
+Defines the dataset, not necessary to define
+
+### --path PATH
+If specified, overrides the PATH of where the file gets written to. If not specified, it has to be present in the cds-request-file
+
+### -o, --overwrite
+
+flag to overwrite it if target file exists.
+### --archive
+pass the downloaded files to datalad add-archive-content –delete.
+### --nosave
+by default all modifications to a dataset are immediately saved. Giving this option will disable this behavior.
+### -m MESSAGE, --message MESSAGE
+Message to be added to the git log
+### --version
+
+show the module and its version
