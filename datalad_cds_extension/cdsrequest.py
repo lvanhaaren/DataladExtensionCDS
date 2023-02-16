@@ -37,9 +37,6 @@ class CdsRemote(SpecialRemote):
     remove = None
 
     def initremote(self) -> None:
-        # setting the uuid here unfortunately does not work, initremote is
-        # executed to late
-        # self.annex.setconfig("uuid", cdsrequest_REMOTE_UUID)
         pass
 
     def prepare(self) -> None:
@@ -50,7 +47,6 @@ class CdsRemote(SpecialRemote):
         dataset_to = request[0:dictStart]
         request_dict_str = request[dictStart:len(request)]
         logger.debug("downloading %s", dataset_to)
-        #self.annex.info("executing {}".format(dataset_to))
 
         request_dict = ast.literal_eval(request_dict_str)
         c = cdsapi.Client()
@@ -68,7 +64,6 @@ class CdsRemote(SpecialRemote):
             self._execute_cds(fromUrl(url),filename)
 
     def checkpresent(self, key: str) -> bool:
-        # We just assume that we can always handle the key
         return True
 
     def claimurl(self, url: str) -> bool:
