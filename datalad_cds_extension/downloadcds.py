@@ -133,11 +133,13 @@ class DownloadCDS(Interface):
 === Do not change lines below ===
 This was the request:
 {}
+The file of the request:
+{}
 ^^^ Do not change lines above ^^^
         """
 
         msg = msg.format(message if message is not None else "",
-            request_str,
+            request_str,pathobj
         )
         
         yield ds.save(pathobj, message=msg)
