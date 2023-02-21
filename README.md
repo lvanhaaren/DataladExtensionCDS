@@ -1,8 +1,18 @@
 # DataLad CDS Extension
 
+## Table of contents
+
+- Recommended knowledge
+- Set up
+- Usage
+- Request know-how
+- Options
+
+
+
 ## Recommended Knowledge:
 
-Datalad https://www.datalad.org/
+DataLad https://www.datalad.org/
 
 ## Set up
 Clone this repository and run this command
@@ -12,7 +22,7 @@ Clone this repository and run this command
 Make sure you have valid credentials for the cds api!
 If you're not registered yet, here is the manual:
 https://cds.climate.copernicus.eu/user/register?destination=%2F%23!%2Fhome \
-Create a datalad dataset:
+Create a DataLad dataset:
 
     datalad create -c text2git DataLad-101
 Change to the dataset:
