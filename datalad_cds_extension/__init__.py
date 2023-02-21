@@ -10,7 +10,7 @@ lgr = logging.getLogger('datalad.downloadcds')
 # to be found by datalad
 command_suite = (
     # description of the command suite, displayed in cmdline help
-    "TestNachricht",
+    "Custom Downloader for CDS data-store",
     [
         # specification of a command, any number of commands can be defined
         (

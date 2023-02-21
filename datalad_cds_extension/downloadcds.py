@@ -40,7 +40,7 @@ logger = logging.getLogger('datalad.cds.download-cds')
 # all commands must be derived from Interface
 class DownloadCDS(Interface):
 
-    """Short description of the command: download-cds       
+    """Downloads specified datasets from the CDS data store     
 
     Long description of arbitrary volume: downloads from the CDS 
     """
