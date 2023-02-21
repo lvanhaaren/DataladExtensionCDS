@@ -15,7 +15,7 @@
 DataLad https://www.datalad.org/
 
 ## Set up
-Clone this repository and run this command
+Clone this repository and run
 
     pip install -e .
 
