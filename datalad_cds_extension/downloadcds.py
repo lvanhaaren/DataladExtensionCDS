@@ -41,9 +41,6 @@ logger = logging.getLogger('datalad.cds.download-cds')
 class DownloadCDS(Interface):
 
     """Downloads specified datasets from the CDS data store     
-    
-    Command in general:
-    datalad download-cds [-h] [-d PATH] [-O PATH] [--archive] [--nosave] [-m MESSAGE] [--version] filenames
 
     More information on our GitHub-Repo:
     https://github.com/lvanhaaren/DataladExtensionCDS
