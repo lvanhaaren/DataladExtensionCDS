@@ -5,7 +5,7 @@
 Datalad https://www.datalad.org/
 
 ## Set up
-Clone this repository and run
+Clone this repository and run this command
 
     pip install -e .
 
