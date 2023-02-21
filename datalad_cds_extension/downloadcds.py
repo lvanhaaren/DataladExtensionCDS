@@ -41,9 +41,7 @@ logger = logging.getLogger('datalad.cds.download-cds')
 class DownloadCDS(Interface):
 
     """Downloads specified datasets from the CDS data store     
-
-    Long description of arbitrary volume: downloads from the CDS 
-
+    
     Command in general:
     datalad download-cds [-h] [-d PATH] [-O PATH] [--archive] [--nosave] [-m MESSAGE] [--version] filenames
 
