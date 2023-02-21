@@ -58,11 +58,6 @@ class DownloadCDS(Interface):
             prevent adding files to the dataset.""",
             constraints=EnsureDataset() | EnsureNone()),
 
-        overwrite=Parameter(
-            args=("-o", "--overwrite"),
-            action="store_true",
-            doc="""flag to overwrite it if target file exists"""),
-
         path=Parameter(
             args=("-O", "--path"),
             doc="""target for download. If the path has a trailing separator,
@@ -92,7 +87,7 @@ class DownloadCDS(Interface):
     @eval_results
     def __call__(
         user_string_input,
-        dataset=None, path=None, overwrite=False,
+        dataset=None, path=None,
         archive=False, save=True, message=None
     ) -> Iterable[Dict]:
         
@@ -135,8 +130,8 @@ The file of the request:
         msg = msg.format(message if message is not None else "",
             request_str,pathobj
         )
-        
-        yield ds.save(pathobj, message=msg)
+        if(save):
+            yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
         if(archive):
             yield from ds.add_archive_content(
