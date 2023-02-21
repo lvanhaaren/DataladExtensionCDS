@@ -59,9 +59,6 @@ Defines the dataset, not necessary to define
 ### --path PATH
 If specified, overrides the PATH of where the file gets written to. If not specified, it has to be present in the cds-request-file
 
-### -o, --overwrite
-
-flag to overwrite it if target file exists.
 ### --archive
 pass the downloaded files to datalad add-archive-content –delete.
 ### --nosave
