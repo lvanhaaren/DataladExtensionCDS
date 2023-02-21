@@ -135,8 +135,8 @@ The file of the request:
         msg = msg.format(message if message is not None else "",
             request_str,pathobj
         )
-        
-        yield ds.save(pathobj, message=msg)
+        if(save):
+            yield ds.save(pathobj, message=msg)
         yield get_status_dict(action="cdsrequest", status="ok")
         if(archive):
             yield from ds.add_archive_content(
