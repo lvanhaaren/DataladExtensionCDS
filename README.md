@@ -15,6 +15,10 @@
 DataLad https://www.datalad.org/
 
 ## Set up
+Before installing this extension, please install datalad!
+
+https://handbook.datalad.org/en/latest/intro/installation.html
+
 Clone this repository and run
 
     pip install -e .

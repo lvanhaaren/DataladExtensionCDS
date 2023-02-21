@@ -40,9 +40,13 @@ logger = logging.getLogger('datalad.cds.download-cds')
 # all commands must be derived from Interface
 class DownloadCDS(Interface):
 
-    """Short description of the command: download-cds       
+    """Downloads specified datasets from the CDS data store     
+    
+    Command in general:
+    datalad download-cds [-h] [-d PATH] [-O PATH] [--archive] [--nosave] [-m MESSAGE] [--version] filenames
 
-    Long description of arbitrary volume: downloads from the CDS 
+    More information on our GitHub-Repo:
+    https://github.com/lvanhaaren/DataladExtensionCDS
     """
 
     _params_ = dict(
